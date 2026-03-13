@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CS2 Web App</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body {
+            background-color: #1b1e23; /* Темный фон в стиле CS */
+            color: #ffffff;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 20px;
+            margin: 0;
+        }
+        h1 { color: #f99e1a; } /* Оранжевый акцент */
+        .btn {
+            background-color: #f99e1a;
+            color: #1b1e23;
+            border: none;
+            padding: 15px 20px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 20px;
+            width: 100%;
+        }
+        .stats-box {
+            background-color: #2c3038;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>CS2 Инфо</h1>
+    <p id="greeting">Привет, игрок!</p>
+
+    <div class="stats-box">
+        <h3>Твоя статистика</h3>
+        <p>Здесь скоро будет твой K/D и Winrate.</p>
+    </div>
+
+    <button class="btn" onclick="sendDataToBot()">Отправить данные в бота</button>
+
+    <script>
+        // Инициализируем Telegram Web App
+        let tg = window.Telegram.WebApp;
+        tg.expand(); // Открываем на весь экран
+
+        // Приветствуем пользователя по имени из Telegram
+        if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
+            document.getElementById('greeting').innerText = `Привет, ${tg.initDataUnsafe.user.first_name}! Готов к каткам?`;
+        }
+
+        // Функция отправки данных обратно в чат
+        function sendDataToBot() {
+            tg.sendData("Пользователь посмотрел статистику CS2");
+            tg.close(); // Закрываем веб-приложение
+        }
+    </script>
+</body>
+</html>
