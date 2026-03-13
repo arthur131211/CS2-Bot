@@ -5,57 +5,68 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body { background: #1b2838; color: #c7d5e0; font-family: 'Segoe UI', sans-serif; padding: 15px; margin: 0; }
-        .card { background: #171a21; border: 1px solid #66c0f4; border-radius: 10px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
-        h2 { color: #66c0f4; margin: 0 0 15px 0; font-size: 20px; }
-        .stat-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #2a475e; }
-        .stat-label { color: #8b929a; }
-        .stat-value { color: #fff; font-weight: bold; }
-        input { 
-            width: 100%; padding: 12px; margin: 15px 0; 
-            background: #101822; color: white; 
-            border: 1px solid #2a475e; border-radius: 5px; 
-            box-sizing: border-box; 
-        }
-        button { 
-            width: 100%; padding: 15px; 
-            background: #66c0f4; border: none; color: white; 
-            font-weight: bold; border-radius: 5px; cursor: pointer;
-        }
-        #stats_screen { display: none; } /* Скрыт по умолчанию */
+        body { background: #1b2838; color: #c7d5e0; font-family: sans-serif; padding: 20px; margin: 0; }
+        .container { background: #171a21; border: 1px solid #66c0f4; border-radius: 12px; padding: 20px; text-align: center; }
+        input { width: 100%; padding: 12px; margin: 10px 0; background: #101822; color: #fff; border: 1px solid #2a475e; border-radius: 5px; box-sizing: border-box; }
+        button { width: 100%; padding: 15px; background: #66c0f4; border: none; color: #fff; font-weight: bold; border-radius: 5px; cursor: pointer; margin-top: 10px; }
+        .stats-grid { display: none; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; }
+        .stat-card { background: #2a475e; padding: 10px; border-radius: 8px; }
+        .label { font-size: 12px; color: #8b929a; display: block; }
+        .value { font-size: 18px; font-weight: bold; color: #66c0f4; }
+        #loader { display: none; margin-top: 10px; color: #ff9d00; }
     </style>
 </head>
 <body>
+    <div class="container">
+        <h2>CS2 STATS</h2>
+        <div id="input_box">
+            <input type="text" id="steam_id" placeholder="Вставь SteamID64">
+            <button onclick="loadStats()">ПОКАЗАТЬ</button>
+        </div>
+        
+        <div id="loader">Загрузка данных...</div>
 
-    <div id="input_screen" class="card">
-        <h2>CS2 ТРЕКЕР</h2>
-        <input type="text" id="steam_id" placeholder="Введите SteamID64 (7656...)">
-        <button onclick="requestStats()">ПОЛУЧИТЬ СТАТИСТИКУ</button>
-    </div>
-
-    <div id="stats_screen" class="card">
-        <h2 id="user_name">СТАТИСТИКА ИГРОКА</h2>
-        <div class="stat-row"><span class="stat-label">Убийства:</span> <span class="stat-value" id="val_kills">-</span></div>
-        <div class="stat-row"><span class="stat-label">K/D Ratio:</span> <span class="stat-value" id="val_kd">-</span></div>
-        <div class="stat-row"><span class="stat-label">Победы:</span> <span class="stat-value" id="val_wins">-</span></div>
-        <div class="stat-row"><span class="stat-label">Headshots:</span> <span class="stat-value" id="val_hs">-</span></div>
-        <button style="margin-top:20px; background:#4e829e;" onclick="location.reload()">НАЗАД</button>
+        <div id="stats_grid" class="stats-grid">
+            <div class="stat-card"><span class="label">Убийства</span><span class="value" id="res_kills">0</span></div>
+            <div class="stat-card"><span class="label">K/D</span><span class="value" id="res_kd">0</span></div>
+            <div class="stat-card"><span class="label">Победы</span><span class="value" id="res_wins">0</span></div>
+            <div class="stat-card"><span class="label">HS %</span><span class="value" id="res_hs">0</span></div>
+            <button onclick="location.reload()" style="grid-column: span 2; background: #4e829e;">СБРОС</button>
+        </div>
     </div>
 
     <script>
         let tg = window.Telegram.WebApp;
         tg.expand();
 
-        function requestStats() {
-            let id = document.getElementById('steam_id').value;
-            if (id.length < 10) {
-                tg.showAlert("Введите корректный SteamID64");
-                return;
+        async function loadStats() {
+            let id = document.getElementById('steam_id').value.trim();
+            if(!id) return tg.showAlert("Введи ID!");
+
+            document.getElementById('loader').style.display = 'block';
+            
+            try {
+                // ВАЖНО: Тут должен быть IP твоего компа или сервера, где запущен bot.py
+                // Если запускаешь на компе, используй сервис ngrok для получения публичного URL
+                const response = await fetch(`http://ТВОЙ_IP_ИЛИ_NGROK:8080/api/stats/${id}`);
+                const data = await response.json();
+
+                if(data.status === "ok") {
+                    document.getElementById('input_box').style.display = 'none';
+                    document.getElementById('loader').style.display = 'none';
+                    document.getElementById('stats_grid').style.display = 'grid';
+                    
+                    document.getElementById('res_kills').innerText = data.kills;
+                    document.getElementById('res_kd').innerText = data.kd;
+                    document.getElementById('res_wins').innerText = data.wins;
+                    document.getElementById('res_hs').innerText = data.hs + "%";
+                } else {
+                    tg.showAlert("Ошибка: Статистика не найдена или скрыта.");
+                }
+            } catch (e) {
+                tg.showAlert("Не удалось соединиться с сервером бота.");
             }
-            // Отправляем ID боту, чтобы он собрал данные
-            tg.sendData("GET_STATS:" + id);
-            // Мы НЕ закрываем окно (tg.close() убрали), 
-            // но нам нужно дождаться ответа от бота.
+            document.getElementById('loader').style.display = 'none';
         }
     </script>
 </body>
