@@ -1,67 +1,29 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CS2 & Faceit Stats</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body { background-color: #0d1117; color: #c9d1d9; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px; margin: 0; }
-        h2 { color: #ff5500; text-align: center; margin-bottom: 25px; }
-        .input-group { margin-bottom: 20px; }
-        label { font-size: 14px; font-weight: bold; color: #8b949e; }
-        input { width: 100%; padding: 12px; box-sizing: border-box; background: #161b22; border: 1px solid #30363d; color: white; border-radius: 8px; margin-top: 8px; outline: none; }
-        input:focus { border-color: #ff5500; }
-        button { width: 100%; padding: 12px; background-color: #ff5500; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; margin-top: 15px; font-size: 16px; }
-        button:active { background-color: #cc4400; }
-        .stats-card { background: #161b22; border: 1px solid #30363d; padding: 20px; border-radius: 10px; margin-top: 20px; display: none; }
-        .stat-row { display: flex; justify-content: space-between; margin-bottom: 12px; border-bottom: 1px solid #21262d; padding-bottom: 8px; font-size: 15px; }
-        .stat-row:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
-        .close-btn { background-color: #da3633; margin-top: 20px; }
-        .close-btn:active { background-color: #b02a27; }
+        body { background: #1b2838; color: #c7d5e0; font-family: sans-serif; text-align: center; padding: 20px; }
+        input { width: 90%; padding: 12px; margin: 10px 0; background: #101822; border: 1px solid #66c0f4; color: white; border-radius: 4px; }
+        button { width: 95%; padding: 12px; background: #66c0f4; border: none; color: white; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
-    <h2>📊 Статистика Игрока</h2>
-
-    <div class="input-group">
-        <label>Faceit Никнейм / Steam ID:</label>
-        <input type="text" id="username" placeholder="Например: s1mple" autocomplete="off">
-        <button onclick="fetchStats()">Найти стату</button>
-    </div>
-
-    <div class="stats-card" id="result">
-        <h3 id="player-name" style="color: #58a6ff; margin-top: 0; text-align: center;">-</h3>
-        <div class="stat-row"><span>Faceit ELO:</span> <strong id="elo" style="color: #ff5500;">-</strong></div>
-        <div class="stat-row"><span>Уровень (Lvl):</span> <strong id="lvl">-</strong></div>
-        <div class="stat-row"><span>K/D Ratio:</span> <strong id="kd">-</strong></div>
-        <div class="stat-row"><span>Winrate:</span> <strong id="winrate">-</strong></div>
-        
-        <button class="close-btn" onclick="tg.close()">Закрыть приложение</button>
-    </div>
+    <h2>Steam CS2 Stats</h2>
+    <p>Вставь ссылку на профиль или SteamID:</p>
+    <input type="text" id="steam_id" placeholder="https://steamcommunity.com/id/...">
+    <button onclick="sendData()">Показать статистику</button>
 
     <script>
-        // Инициализируем Web App, чтобы окно открылось на всю высоту
         let tg = window.Telegram.WebApp;
-        tg.expand(); 
-
-        function fetchStats() {
-            let username = document.getElementById('username').value;
-            if(!username) {
-                tg.showAlert("Введите никнейм!");
-                return;
+        tg.expand();
+        function sendData() {
+            let val = document.getElementById('steam_id').value;
+            if(val) {
+                tg.sendData("STEAM:" + val);
+                tg.close();
             }
-
-            // Показываем карточку
-            document.getElementById('result').style.display = 'block';
-            document.getElementById('player-name').innerText = username.toUpperCase();
-
-            // Пока мы не подключили реальный ключ API Faceit, скрипт генерирует демо-данные, 
-            // чтобы ты убедился, что интерфейс не закрывается и работает.
-            document.getElementById('elo').innerText = Math.floor(Math.random() * 2000) + 1000;
-            document.getElementById('lvl').innerText = Math.floor(Math.random() * 10) + 1;
-            document.getElementById('kd').innerText = (Math.random() * (1.6 - 0.8) + 0.8).toFixed(2);
-            document.getElementById('winrate').innerText = Math.floor(Math.random() * 40) + 30 + "%";
         }
     </script>
 </body>
